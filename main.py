@@ -8,17 +8,12 @@ import torch
 import warnings
 warnings.filterwarnings("ignore")
 
-# 1. RGAN model
-from timegan import timegan
+# 1. GTSGAN model
+from gtsgan import gtsgan
 # 2. Data loading
 from data_loading import real_data_loading
-# 3. Metrics
-from metrics.visualization_metrics import visualization
-# 4. Utils
+# 3. Utils
 from utils import Parameters
-
-
-
 
 #set the device 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -27,8 +22,6 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 data_path = "data/"
 dataset = "energy"
 path_real_data = "data/" + dataset + "_data.csv"
-#Evaluation of the model, by default can be set to false.
-eval_model = False
 
 #parameters
 
@@ -41,7 +34,7 @@ params.batch_size = 128
 params.max_steps = 10000
 params.gamma = 1.0
 params.save_model = True
-params.print_every = 500
+params.print_every = 750
 params.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 params.save_synth_data = False
 
@@ -59,6 +52,7 @@ ori_data, (minimum, maximum) = real_data_loading(path_real_data, params.seq_len)
 
 params.input_size = ori_data[0].shape[1]
 params.hidden_size = 24
+params.disc_out_size = 1
 params.num_layers = 3
 
 print('Preprocessing Complete!')
@@ -66,15 +60,15 @@ print('Preprocessing Complete!')
 with open(data_path + params.dataset + '_real_data.npy', 'wb') as f:
     np.save(f, np.array(ori_data))
 
-print("Saved real data!")
+print("Saved real data! {}".format(params.dataset))
 
-# Run TimeGAN
+# Run GTSGAN
 """
-Method: timegan()
+Method: gtsgan()
 ---------------------------------------------------------------------------------------------------------------------
-    - Runs the timegan model.
+    - Runs the gtsgan model.
 """
-generated_data = timegan(ori_data, params)  
+generated_data = gtsgan(ori_data, params)  
 
 # # Renormalization
 # generated_data = generated_data*maximum

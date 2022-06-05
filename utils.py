@@ -1,20 +1,21 @@
-class Parameters(object):
-  def __init__(self):
-    pass
+## Necessary Packages
+import numpy as np
+import torch
 
+""" utils.py
 
+class: 
+    - Parameters: store all the parameters
 
-"""
-utils.py
 (1) train_test_divide: Divide train and test data for both original and synthetic data.
 (2) extract_time: Returns Maximum sequence length and each sequence length.
 (4) random_generator: random vector generator
 (5) batch_generator: mini-batch generator
 """
 
-## Necessary Packages
-import numpy as np
-import torch
+class Parameters(object):
+  def __init__(self):
+    pass
 
 
 def train_test_divide (data_x, data_x_hat, data_t, data_t_hat, train_rate = 0.8):
