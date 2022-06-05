@@ -1,3 +1,3 @@
 # GTSGAN
 
-Time Series Generative Adversarial Networks with Embedding Fusion.
+Graph Based Time Series Generative Adversarial Networks with Embedding Fusion.
