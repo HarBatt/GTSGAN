@@ -57,7 +57,7 @@ class Loss:
 
 def gtsgan(ori_data, params):
     embedder = Embedder(params.input_size, params.hidden_size, params.num_layers).to(params.device)
-    structural_embedder = GraphEncoder(params, params.seq_len, params.hidden_size).to(params.device)
+    structural_embedder = GraphEncoder(params, node_num= params.num_nodes, dim = params.graph_hidden, input_dim = params.graph_input, topk = params.top_k).to(params.device)
     fusion_embedd = FusionBlock(params.hidden_size, params.hidden_size).to(params.device)
     recovery = Recovery(params.hidden_size, params.input_size, params.num_layers).to(params.device)
     generator = Generator(params.input_size, params.hidden_size, params.num_layers).to(params.device)
@@ -86,9 +86,9 @@ def gtsgan(ori_data, params):
         # Get the real batch data, and synthetic batch data. 
         x = data_gen.__next__() 
         h1 = embedder(x)
-        h2 = structural_embedder(x)
+        print(h1.shape)
+        h2, node_embedding, learned_graph = structural_embedder(x)
         h = fusion_embedd(h1, h2)
-
         x_tilde = recovery(h)
         #Recovery = x_tilde.shape = (batch_size = 128, seq_len = 24, 28)
         E_loss_T0 = loss.E_loss_T0(x_tilde, x)
@@ -108,7 +108,7 @@ def gtsgan(ori_data, params):
         x = data_gen.__next__()
 
         h1 = embedder(x)
-        h2 = structural_embedder(x)
+        h2, node_embedding, learned_graph = structural_embedder(x)
         h = fusion_embedd(h1, h2)
 
         h_hat_supervise = supervisor(h)
@@ -130,7 +130,7 @@ def gtsgan(ori_data, params):
             z = torch.randn(x.size(0), x.size(1), x.size(2)).to(params.device)
 
             h1 = embedder(x)
-            h2 = structural_embedder(x)
+            h2, node_embedding, learned_graph = structural_embedder(x)
             h = fusion_embedd(h1, h2)
 
             e_hat = generator(z)
@@ -153,7 +153,7 @@ def gtsgan(ori_data, params):
 
             # Train the Embedder
             h1 = embedder(x)
-            h2 = structural_embedder(x)
+            h2, node_embedding, learned_graph = structural_embedder(x)
             h = fusion_embedd(h1, h2)
 
             x_tilde = recovery(h)
@@ -172,7 +172,7 @@ def gtsgan(ori_data, params):
         z = torch.randn(x.size(0), x.size(1), x.size(2)).to(params.device)
         
         h1 = embedder(x)
-        h2 = structural_embedder(x)
+        h2, node_embedding, learned_graph = structural_embedder(x)
         h = fusion_embedd(h1, h2)
         
         e_hat = generator(z)
@@ -193,6 +193,7 @@ def gtsgan(ori_data, params):
         if step % params.print_every == 0:
             print("step: "+ str(step)+ "/"+ str(params.max_steps)+ ", d_loss: "+ str(np.round(loss_d.item(), 4))+ ", g_loss_u: "+ str(np.round(G_loss_U.item(), 4))+  ", g_loss_s: "+ str(np.round(np.sqrt(G_loss_S.item()), 4))+ ", g_loss_v: "+ str(np.round(G_loss_V.item(), 4))+ ", e_loss_t0: "+ str(np.round(np.sqrt(E_loss_T0.item()), 4)))
     print("Finish Joint Training")
+
     
     with torch.no_grad():
         x = data_gen.__next__()

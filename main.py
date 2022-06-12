@@ -20,7 +20,7 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 ## Data loading
 data_path = "data/"
-dataset = "energy"
+dataset = "stock"
 path_real_data = "data/" + dataset + "_data.csv"
 
 #parameters
@@ -34,9 +34,10 @@ params.batch_size = 128
 params.max_steps = 10000
 params.gamma = 1.0
 params.save_model = True
-params.print_every = 750
-params.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-params.save_synth_data = False
+params.print_every = 500
+params.device = "cuda"
+params.save_synth_data = True
+
 
 #preprocessing the data.
 
@@ -54,6 +55,14 @@ params.input_size = ori_data[0].shape[1]
 params.hidden_size = 24
 params.disc_out_size = 1
 params.num_layers = 3
+
+
+########################## Additional Parameters for Graph Encoder ##########################
+params.num_nodes = params.input_size
+params.graph_hidden = params.seq_len
+params.graph_input = params.seq_len
+params.top_k = 5
+
 
 print('Preprocessing Complete!')
    
@@ -74,5 +83,6 @@ generated_data = gtsgan(ori_data, params)
 # generated_data = generated_data*maximum
 # generated_data = generated_data + minimum 
 
-with open(data_path + params.dataset + '_synthetic_data.npy', 'wb') as f:
-    np.save(f, np.array(generated_data))
+if params.save_synth_data:
+    with open(data_path + params.dataset + '_synthetic_data.npy', 'wb') as f:
+        np.save(f, np.array(generated_data))

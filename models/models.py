@@ -1,6 +1,5 @@
 import torch
 import torch.nn as nn
-from models.gae import GraphEncoder
 
 class Embedder(nn.Module):
     def __init__(self, input_size, hidden_size, num_layers):
@@ -70,6 +69,7 @@ class Discriminator(nn.Module):
         x = self.linear(x)
         return x
 
+
 class FusionBlock(nn.Module):
     def __init__(self, temporal_embedd_size, structural_embedd_size):
         super(FusionBlock, self).__init__()
@@ -80,7 +80,7 @@ class FusionBlock(nn.Module):
     def linear_block(self, input_size, hidden_size):
         layers = nn.ModuleList([
             nn.Linear(input_size, hidden_size, bias = False),
-            nn.Linear(hidden_size, hidden_size, bias = False),
+            nn.Linear(hidden_size, hidden_size, bias = True),
             nn.Sigmoid()
         ])
         return layers
