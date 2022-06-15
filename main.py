@@ -34,7 +34,7 @@ params.batch_size = 128
 params.max_steps = 10000
 params.gamma = 1.0
 params.save_model = True
-params.print_every = 500
+params.print_every = 1000
 params.device = "cuda"
 params.save_synth_data = True
 
@@ -52,7 +52,7 @@ Method: real_data_loading()
 ori_data, (minimum, maximum) = real_data_loading(path_real_data, params.seq_len)
 
 params.input_size = ori_data[0].shape[1]
-params.hidden_size = 24
+params.hidden_size = 16
 params.disc_out_size = 1
 params.num_layers = 3
 
@@ -61,8 +61,9 @@ params.num_layers = 3
 params.num_nodes = params.input_size
 params.graph_hidden = params.seq_len
 params.graph_input = params.seq_len
-params.top_k = 5
-
+params.top_k = params.input_size - 1
+params.return_attention = True
+params.get_graph = True
 
 print('Preprocessing Complete!')
    
@@ -77,7 +78,10 @@ Method: gtsgan()
 ---------------------------------------------------------------------------------------------------------------------
     - Runs the gtsgan model.
 """
-generated_data = gtsgan(ori_data, params)  
+
+generated_data, new_edge_index, learned_graph = gtsgan(ori_data, params) 
+# print(new_edge_index.shape)
+# print(learned_graph.shape) 
 
 # # Renormalization
 # generated_data = generated_data*maximum
@@ -86,3 +90,11 @@ generated_data = gtsgan(ori_data, params)
 if params.save_synth_data:
     with open(data_path + params.dataset + '_synthetic_data.npy', 'wb') as f:
         np.save(f, np.array(generated_data))
+
+if params.return_attention:
+    with open(data_path + params.dataset + '_attention_weights.npy', 'wb') as f:
+        np.save(f, np.array(new_edge_index))
+
+if params.get_graph:
+    with open(data_path + params.dataset + '_graph.npy', 'wb') as f:
+        np.save(f, np.array(learned_graph))
